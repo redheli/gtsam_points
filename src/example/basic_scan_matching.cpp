@@ -14,10 +14,36 @@
 #include <glk/pointcloud_buffer.hpp>
 #include <guik/viewer/light_viewer.hpp>
 
+#include <iostream>
+#include <filesystem>
+
 int main(int argc, char** argv) {
+  // Check command line arguments
+  if (argc != 2) {
+    std::cout << "Usage: " << argv[0] << " <data_folder_path>" << std::endl;
+    std::cout << "Example: " << argv[0] << " data/kitti_00" << std::endl;
+    return 1;
+  }
+
+  std::string data_folder = argv[1];
+  
+  // Construct file paths
+  std::filesystem::path target_path = std::filesystem::path(data_folder) / "000000.bin";
+  std::filesystem::path source_path = std::filesystem::path(data_folder) / "000001.bin";
+
+  // Check if files exist
+  if (!std::filesystem::exists(target_path)) {
+    std::cerr << "Error: Target file not found: " << target_path << std::endl;
+    return 1;
+  }
+  if (!std::filesystem::exists(source_path)) {
+    std::cerr << "Error: Source file not found: " << source_path << std::endl;
+    return 1;
+  }
+
   // Read target and source point clouds
-  const auto target_points = gtsam_points::read_points("data/kitti_00/000000.bin");
-  const auto source_points = gtsam_points::read_points("data/kitti_00/000001.bin");
+  const auto target_points = gtsam_points::read_points(target_path.string());
+  const auto source_points = gtsam_points::read_points(source_path.string());
 
   // Create gtsam_points::PointCloudCPU instances that hold point data
   const auto target_frame = std::make_shared<gtsam_points::PointCloudCPU>(target_points);
